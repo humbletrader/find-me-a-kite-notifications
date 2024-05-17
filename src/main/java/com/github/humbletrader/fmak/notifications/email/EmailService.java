@@ -1,4 +1,4 @@
-package com.github.humbletrader.fmak.notifications;
+package com.github.humbletrader.fmak.notifications.email;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

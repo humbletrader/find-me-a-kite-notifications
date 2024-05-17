@@ -2,9 +2,8 @@ package com.github.humbletrader.fmak.notifications.search;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.humbletrader.fmak.notifications.EmailService;
+import com.github.humbletrader.fmak.notifications.NotificationDbEntity;
 import com.github.humbletrader.fmak.query.FmakSqlBuilder;
 import com.github.humbletrader.fmak.query.ParameterizedStatement;
 import com.github.humbletrader.fmak.query.SearchValAndOp;
@@ -32,8 +31,9 @@ public class JsonQueryService {
         this.searchRepository = searchRepository;
     }
 
-    public List<String> query(String json){
+    public List<SearchItem> queryResultsForNotification(NotificationDbEntity notification){
         try{
+            String json = notification.queryAsJson();
             Map<String, SearchValAndOp> jsonAsObject = (Map<String, SearchValAndOp>)jsonToJava.readValue(json, TYPE_REFERENCE);
             ParameterizedStatement peramStmt = sqlBuilder.buildSearchSql(jsonAsObject, 0);
             return searchRepository.search(peramStmt);

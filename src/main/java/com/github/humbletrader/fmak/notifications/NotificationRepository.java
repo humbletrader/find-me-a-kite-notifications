@@ -23,15 +23,23 @@ public class NotificationRepository {
 
     public List<NotificationDbEntity> readNotifications(){
         logger.info("reading notifications ... ");
-        return jdbcTemplate.query("select * from notifications", new RowMapper<NotificationDbEntity>() {
-            @Override
-            public NotificationDbEntity mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return new NotificationDbEntity(
+        return jdbcTemplate.query(
+                "select * from notifications",
+                (rs,  rowNum) -> new NotificationDbEntity(
                         rs.getInt("id"),
                         rs.getString("email"),
-                        rs.getString("query_as_json"));
-            }
-        });
+                        rs.getString("query_as_json"),
+                        rs.getInt("run_count")
+                )
+        );
+    }
+
+    public void updateRunCount(NotificationDbEntity oldNotification, int newRunId){
+        logger.info("upgrading the run id for notification {} to {}", oldNotification.id(), newRunId);
+        jdbcTemplate.update(
+                "update notifications set run_count = ? where id = ?",
+                newRunId, oldNotification.id()
+        );
     }
 
 }
