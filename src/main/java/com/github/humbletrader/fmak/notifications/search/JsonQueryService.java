@@ -3,7 +3,7 @@ package com.github.humbletrader.fmak.notifications.search;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.humbletrader.fmak.notifications.NotificationDbEntity;
+import com.github.humbletrader.fmak.notifications.notifications.NotificationDbEntity;
 import com.github.humbletrader.fmak.query.FmakSqlBuilder;
 import com.github.humbletrader.fmak.query.ParameterizedStatement;
 import com.github.humbletrader.fmak.query.SearchValAndOp;

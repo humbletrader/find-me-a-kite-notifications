@@ -1,13 +1,10 @@
-package com.github.humbletrader.fmak.notifications;
+package com.github.humbletrader.fmak.notifications.notifications;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 
 @Repository
@@ -34,7 +31,7 @@ public class NotificationRepository {
         );
     }
 
-    public void updateRunCount(NotificationDbEntity oldNotification, int newRunId){
+    public void updateRunId(NotificationDbEntity oldNotification, int newRunId){
         logger.info("upgrading the run id for notification {} to {}", oldNotification.id(), newRunId);
         jdbcTemplate.update(
                 "update notifications set run_count = ? where id = ?",

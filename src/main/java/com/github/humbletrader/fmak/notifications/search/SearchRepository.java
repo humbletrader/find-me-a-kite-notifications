@@ -21,14 +21,15 @@ public class SearchRepository {
 
     public List<SearchItem> search(ParameterizedStatement paramStmt){
         log.info("running query {}", paramStmt.getSqlWithoutParameters());
+        //p.brand_name_version, p.link, a.price, a.size, p.condition, p.visible_to_public
         return jdbcTemplate.query(
                 paramStmt.getSqlWithoutParameters(),
                 (rs, rowCount) -> new SearchItem(
-                        rs.getString(1),
-                        rs.getString(2),
-                        rs.getDouble(3),
-                        rs.getString(4),
-                        rs.getString(5)),
+                        rs.getString("link"),
+                        rs.getString("brand_name_version"),
+                        rs.getDouble("price"),
+                        rs.getString("size"),
+                        rs.getString("condition")),
                 paramStmt.getParamValues().toArray()
         );
     }
