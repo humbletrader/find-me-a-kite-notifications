@@ -45,7 +45,7 @@
         <dependency>
             <groupId>com.github.humbletrader</groupId>
             <artifactId>findmeakite-sql-builder</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1</version>
         </dependency>
 
         <dependency>
