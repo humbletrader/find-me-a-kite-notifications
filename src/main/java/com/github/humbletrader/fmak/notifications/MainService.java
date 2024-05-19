@@ -10,6 +10,7 @@ import com.github.humbletrader.fmak.notifications.search.SearchItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.github.humbletrader.fmak.notifications.RunMode.AFTER;
 
 @Service
 public class MainService {
@@ -39,7 +42,7 @@ public class MainService {
     private EmailService emailService;
 
     @Transactional
-    public void business(){
+    public void business(RunMode runMode){
         //get the list of notifications
         List<NotificationDbEntity> notifications = notificationRepository.readNotifications();
 
@@ -51,7 +54,7 @@ public class MainService {
             // 2. save the first page of data
             notificationResultsRepository.insertResults(firstPage, notification);
 
-            if(notification.runId() != 0){
+            if(AFTER.equals(runMode)){
                 // 3. do the diff (if configured) except for th first run
                 List<SearchItem> diff = notificationResultsRepository.diffBetween(
                         notification,
@@ -71,7 +74,7 @@ public class MainService {
                     log.info("email not created for notification {} ane email {} because diff is empty", notification.id(), notification.email());
                 }
 
-            } //end if
+            } //end if mode = after
 
             // 5. update the run_count for current notification
             notificationRepository.updateRunId(
@@ -89,11 +92,18 @@ public class MainService {
             return "cat " + notificationEmailFile.emailFilePath().toString() + "| msmtp " + notificationEmailFile.emailRecipient();
         }).collect(Collectors.joining("\n", "#! /bin/bash\n", ""));
 
-        try {
-            Files.writeString(Paths.get("./mail/sendEmails.sh"), sendEmailFileContent);
-        }catch (IOException ioException){
-            log.error("error writing the sendEmails.sh", ioException);
+        if(AFTER.equals(runMode)){
+            try {
+                Path sendEmailFile = Paths.get("./mail/sendEmails.sh");
+                log.info("writing the script for sending emails {}", sendEmailFile.toString());
+                Files.writeString(sendEmailFile, sendEmailFileContent);
+            }catch (IOException ioException){
+                log.error("error writing the sendEmails.sh", ioException);
+            }
+        }else{
+            log.info("no sendEmail.sh file written because we run in {} mode", runMode);
         }
+
 
     }
 

@@ -22,8 +22,12 @@ public class MainApp implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        log.info("executing : command line runner");
+        RunMode runMode = RunMode.BEFORE;
+        if(args.length > 0 && "after".equals(args[0])) {
+            runMode = RunMode.AFTER;
+        }
+        log.info("running notifications in {} mode", runMode);
+        mainService.business(runMode);
 
-        mainService.business();
     }
 }
