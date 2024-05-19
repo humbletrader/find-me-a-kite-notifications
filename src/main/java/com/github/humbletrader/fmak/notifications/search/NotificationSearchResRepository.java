@@ -24,7 +24,6 @@ public class NotificationSearchResRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @Transactional
     public void insertResults(List<SearchItem> results,
                               NotificationDbEntity notification){
         int newRunId = notification.runId() + 1;
@@ -76,7 +75,7 @@ public class NotificationSearchResRepository {
                         rs.getDouble("price"),
                         rs.getString("size"),
                         rs.getString("condition")),
-                notification.id(), prevRunId, notification.id(), lastRunId
+                notification.id(), lastRunId, notification.id(), prevRunId
         );
     }
 }

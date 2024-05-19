@@ -2,18 +2,29 @@ package com.github.humbletrader.fmak.notifications;
 
 import com.github.humbletrader.fmak.notifications.email.EmailService;
 import com.github.humbletrader.fmak.notifications.notifications.NotificationDbEntity;
+import com.github.humbletrader.fmak.notifications.notifications.NotificationEmailFile;
 import com.github.humbletrader.fmak.notifications.notifications.NotificationRepository;
 import com.github.humbletrader.fmak.notifications.search.JsonQueryService;
 import com.github.humbletrader.fmak.notifications.search.NotificationSearchResRepository;
 import com.github.humbletrader.fmak.notifications.search.SearchItem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MainService {
+
+    private static Logger log = LoggerFactory.getLogger(MainService.class);
 
     @Autowired
     private NotificationRepository notificationRepository;
@@ -33,7 +44,8 @@ public class MainService {
         List<NotificationDbEntity> notifications = notificationRepository.readNotifications();
 
         //for each notification:
-        notifications.forEach(notification -> {
+        var sendEmailFileContent = notifications.stream().flatMap(notification -> {
+            Optional<NotificationEmailFile> result = Optional.empty();
             // 1. get the first page of data
             List<SearchItem> firstPage = queryService.queryResultsForNotification(notification);
             // 2. save the first page of data
@@ -48,7 +60,17 @@ public class MainService {
                 );
 
                 // 4. send email (if configured)
-                emailService.sendEmail(notification, diff);
+                if(!diff.isEmpty()){
+                    try {
+                        Path emailFilePath = emailService.createEmail(notification, diff);
+                        result = Optional.of(new NotificationEmailFile(emailFilePath, notification.email()));
+                    }catch (IOException ioException){
+                        log.error("error writing email file for notification "+notification.id(), ioException);
+                    }
+                }else{
+                    log.info("email not created for notification {} ane email {} because diff is empty", notification.id(), notification.email());
+                }
+
             } //end if
 
             // 5. update the run_count for current notification
@@ -57,11 +79,22 @@ public class MainService {
                     notification.runId()+1
             );
 
-//            notificationResultsRepository.deleteSearchResultsFor(
-//                    notification,
-//                    notification.runId()
-//            );
-        });
+            notificationResultsRepository.deleteSearchResultsFor(
+                    notification,
+                    notification.runId()
+            );
+
+            return result.stream();
+        }).map(notificationEmailFile -> {
+            return "cat " + notificationEmailFile.emailFilePath().toString() + "| msmtp " + notificationEmailFile.emailRecipient();
+        }).collect(Collectors.joining("\n", "#! /bin/bash\n", ""));
+
+        try {
+            Files.writeString(Paths.get("./mail/sendEmails.sh"), sendEmailFileContent);
+        }catch (IOException ioException){
+            log.error("error writing the sendEmails.sh", ioException);
+        }
+
     }
 
 }
