@@ -41,6 +41,9 @@ public class MainService {
     @Autowired
     private EmailService emailService;
 
+    @Value("${fmak.notifications.cleanup:false}")
+    private boolean deletePrevResults;
+
     @Transactional
     public void business(RunMode runMode){
         //get the list of notifications
@@ -82,10 +85,12 @@ public class MainService {
                     notification.runId()+1
             );
 
-            notificationResultsRepository.deleteSearchResultsFor(
-                    notification,
-                    notification.runId()
-            );
+            if(deletePrevResults) {
+                notificationResultsRepository.deleteSearchResultsFor(
+                        notification,
+                        notification.runId()
+                );
+            }
 
             return result.stream();
         }).map(notificationEmailFile -> {

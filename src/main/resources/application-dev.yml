@@ -27,5 +27,7 @@ management:
 
 # application specific properties
 fmak:
+  notifications:
+    cleanup: false
   supporter:
     tokens: test1,test2,test3

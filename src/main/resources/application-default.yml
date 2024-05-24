@@ -28,5 +28,7 @@ management:
 
 # application specific properties
 fmak:
+  notifications:
+    cleanup: false
   supporter:
     tokens: ${SUPPORTER_TOKENS}
