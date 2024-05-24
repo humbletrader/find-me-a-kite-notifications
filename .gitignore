@@ -29,3 +29,4 @@ target/
 # project specific files 
 run_prod.sh
 output/
+mail/
