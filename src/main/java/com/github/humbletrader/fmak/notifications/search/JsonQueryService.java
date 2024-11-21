@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.SequencedSet;
 
 @Service
 public class JsonQueryService {
@@ -22,7 +23,7 @@ public class JsonQueryService {
     private final FmakSqlBuilder sqlBuilder = new FmakSqlBuilder(20);
 
     private final ObjectMapper jsonToJava = new ObjectMapper();
-    private final TypeReference TYPE_REFERENCE = new TypeReference<Map<String, SearchValAndOp>>(){};
+    private final TypeReference TYPE_REFERENCE = new TypeReference<Map<String, SequencedSet<SearchValAndOp>>>(){};
 
 
     private final SearchRepository searchRepository;
@@ -34,7 +35,7 @@ public class JsonQueryService {
     public List<SearchItem> queryResultsForNotification(NotificationDbEntity notification){
         try{
             String json = notification.queryAsJson();
-            Map<String, SearchValAndOp> jsonAsObject = (Map<String, SearchValAndOp>)jsonToJava.readValue(json, TYPE_REFERENCE);
+            Map<String, SequencedSet<SearchValAndOp>> jsonAsObject = (Map<String, SequencedSet<SearchValAndOp>>)jsonToJava.readValue(json, TYPE_REFERENCE);
             ParameterizedStatement peramStmt = sqlBuilder.buildSearchSql(jsonAsObject, 0);
             return searchRepository.search(peramStmt);
         }catch (JsonProcessingException jsonExc){
