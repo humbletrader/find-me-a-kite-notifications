@@ -11,8 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.SequencedSet;
+import java.util.stream.Collectors;
 
 @Service
 public class JsonQueryService {
@@ -22,7 +25,7 @@ public class JsonQueryService {
     private final FmakSqlBuilder sqlBuilder = new FmakSqlBuilder(20);
 
     private final ObjectMapper jsonToJava = new ObjectMapper();
-    private final TypeReference TYPE_REFERENCE = new TypeReference<Map<String, SearchValAndOp>>(){};
+    private final TypeReference TYPE_REFERENCE = new TypeReference<Map<String, List<SearchValAndOp>>>(){};
 
 
     private final SearchRepository searchRepository;
@@ -34,8 +37,11 @@ public class JsonQueryService {
     public List<SearchItem> queryResultsForNotification(NotificationDbEntity notification){
         try{
             String json = notification.queryAsJson();
-            Map<String, SearchValAndOp> jsonAsObject = (Map<String, SearchValAndOp>)jsonToJava.readValue(json, TYPE_REFERENCE);
-            ParameterizedStatement peramStmt = sqlBuilder.buildSearchSql(jsonAsObject, 0);
+            Map<String, List<SearchValAndOp>> jsonAsObject = (Map<String, List<SearchValAndOp>>)jsonToJava.readValue(json, TYPE_REFERENCE);
+            Map<String, SequencedSet<SearchValAndOp>> query = jsonAsObject.entrySet()
+                    .stream()
+                    .collect(Collectors.toMap(Map.Entry::getKey, e -> new LinkedHashSet<>(e.getValue())));
+            ParameterizedStatement peramStmt = sqlBuilder.buildSearchSql(query, 0);
             return searchRepository.search(peramStmt);
         }catch (JsonProcessingException jsonExc){
             throw new RuntimeException(jsonExc);
