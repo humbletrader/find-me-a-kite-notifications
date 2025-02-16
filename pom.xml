@@ -6,13 +6,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.5</version>
+        <version>3.4.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
     <groupId>com.github.humbletrader</groupId>
     <artifactId>findmeakite-notifications</artifactId>
-    <version>1.4.1</version>
+    <version>1.4.2</version>
     <name>find-me-a-kite-notifications</name>
     <description>Notification system for find-me-a-kite</description>
 
@@ -51,19 +51,16 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>1.4.12</version>
         </dependency>
 
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.4.12</version>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>2.0.7</version>
         </dependency>
 
         <dependency>
