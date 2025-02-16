@@ -41,7 +41,7 @@ public class JsonQueryService {
             Map<String, SequencedSet<SearchValAndOp>> query = jsonAsObject.entrySet()
                     .stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, e -> new LinkedHashSet<>(e.getValue())));
-            ParameterizedStatement peramStmt = sqlBuilder.buildSearchSql(query, 0);
+            ParameterizedStatement peramStmt = sqlBuilder.buildSearchSqlForWebFilters(query, 0);
             return searchRepository.search(peramStmt);
         }catch (JsonProcessingException jsonExc){
             throw new RuntimeException(jsonExc);
