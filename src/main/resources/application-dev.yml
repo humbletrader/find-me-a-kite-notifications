@@ -28,6 +28,6 @@ management:
 # application specific properties
 fmak:
   notifications:
-    cleanup: false
+    cleanup: true
   supporter:
     tokens: test1,test2,test3
