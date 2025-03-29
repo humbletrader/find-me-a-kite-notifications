@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.github.humbletrader.fmak.notifications.RunMode.AFTER;
 
 @Service
 public class MainService {
@@ -41,11 +40,11 @@ public class MainService {
     @Autowired
     private EmailService emailService;
 
-    @Value("${fmak.notifications.cleanup:false}")
+    @Value("${fmak.notifications.cleanup:true}")
     private boolean deletePrevResults;
 
     @Transactional
-    public void business(RunMode runMode){
+    public void business(){
         //get the list of notifications
         List<NotificationDbEntity> notifications = notificationRepository.readNotifications();
 
@@ -57,34 +56,32 @@ public class MainService {
             // 2. save the first page of data
             notificationResultsRepository.insertResults(firstPage, notification);
 
-            if(AFTER.equals(runMode)){
-                // 3. do the diff (if configured) except for th first run
-                List<SearchItem> diff = notificationResultsRepository.diffBetween(
-                        notification,
-                        notification.runId(),
-                        notification.runId() + 1
-                );
+            // 3. do the diff (if configured) except for th first run
+            List<SearchItem> diff = notificationResultsRepository.diffBetween(
+                    notification,
+                    notification.runId(),
+                    notification.runId() + 1
+            );
 
-                // 4. send email (if configured)
-                if(!diff.isEmpty()){
-                    try {
-                        Path emailFilePath = emailService.createEmail(notification, diff);
-                        result = Optional.of(new NotificationEmailFile(emailFilePath, notification.email()));
-                    }catch (IOException ioException){
-                        log.error("error writing email file for notification "+notification.id(), ioException);
-                    }
-                }else{
-                    log.info("email not created for notification {} ane email {} because diff is empty", notification.id(), notification.email());
+            // 4. send email (if configured)
+            if(!diff.isEmpty()){
+                try {
+                    Path emailFilePath = emailService.createEmail(notification, diff);
+                    result = Optional.of(new NotificationEmailFile(emailFilePath, notification.email()));
+                }catch (IOException ioException){
+                    log.error("error writing email file for notification "+notification.id(), ioException);
                 }
-
-            } //end if mode = after
+            }else{
+                log.info("email not created for notification {} ane email {} because diff is empty", notification.id(), notification.email());
+            }
 
             // 5. update the run_count for current notification
             notificationRepository.updateRunId(
                     notification,
-                    notification.runId()+1
+                    notification.runId() + 1
             );
 
+            //6. delete the previous search results because we have new ones inserted
             if(deletePrevResults) {
                 notificationResultsRepository.deleteSearchResultsFor(
                         notification,
@@ -97,19 +94,14 @@ public class MainService {
             return "cat " + notificationEmailFile.emailFilePath().toString() + "| msmtp " + notificationEmailFile.emailRecipient();
         }).collect(Collectors.joining("\n", "#! /bin/bash\n", ""));
 
-        if(AFTER.equals(runMode)){
-            try {
-                Path sendEmailFile = Paths.get("./mail/sendEmails.sh");
-                log.info("writing the script for sending emails {}", sendEmailFile.toString());
-                Files.writeString(sendEmailFile, sendEmailFileContent);
-            }catch (IOException ioException){
-                log.error("error writing the sendEmails.sh", ioException);
-            }
-        }else{
-            log.info("no sendEmail.sh file written because we run in {} mode", runMode);
+        //7. create the send emails script
+        try {
+            Path sendEmailFile = Paths.get("./mail/sendEmails.sh");
+            log.info("writing the script for sending emails {}", sendEmailFile.toString());
+            Files.writeString(sendEmailFile, sendEmailFileContent);
+        }catch (IOException ioException){
+            log.error("error writing the sendEmails.sh", ioException);
         }
-
-
     }
 
 }

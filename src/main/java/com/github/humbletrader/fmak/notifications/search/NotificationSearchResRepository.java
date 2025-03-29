@@ -74,7 +74,8 @@ public class NotificationSearchResRepository {
                         rs.getString("brand_name_version"),
                         rs.getDouble("price"),
                         rs.getString("size"),
-                        rs.getString("condition")),
+                        rs.getString("condition")
+                ),
                 notification.id(), lastRunId, notification.id(), prevRunId
         );
     }
