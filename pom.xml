@@ -12,7 +12,7 @@
 
     <groupId>com.github.humbletrader</groupId>
     <artifactId>findmeakite-notifications</artifactId>
-    <version>1.5.0</version>
+    <version>1.6.0</version>
     <name>find-me-a-kite-notifications</name>
     <description>Notification system for find-me-a-kite</description>
 

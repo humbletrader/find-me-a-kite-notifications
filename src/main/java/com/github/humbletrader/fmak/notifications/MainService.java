@@ -49,43 +49,43 @@ public class MainService {
         List<NotificationDbEntity> notifications = notificationRepository.readNotifications();
 
         //for each notification:
-        var sendEmailFileContent = notifications.stream().flatMap(notification -> {
+        var sendEmailFileContent = notifications.stream().flatMap(currNotification -> {
             Optional<NotificationEmailFile> result = Optional.empty();
             // 1. get the first page of data
-            List<SearchItem> firstPage = queryService.queryResultsForNotification(notification);
+            List<SearchItem> firstPage = queryService.queryResultsForNotification(currNotification);
             // 2. save the first page of data
-            notificationResultsRepository.insertResults(firstPage, notification);
+            notificationResultsRepository.insertResults(firstPage, currNotification);
 
             // 3. do the diff (if configured) except for th first run
             List<SearchItem> diff = notificationResultsRepository.diffBetween(
-                    notification,
-                    notification.runId(),
-                    notification.runId() + 1
+                    currNotification,
+                    currNotification.runId(),
+                    currNotification.runId() + 1
             );
 
             // 4. send email (if configured)
             if(!diff.isEmpty()){
                 try {
-                    Path emailFilePath = emailService.createEmail(notification, diff);
-                    result = Optional.of(new NotificationEmailFile(emailFilePath, notification.email()));
+                    Path emailFilePath = emailService.createEmail(currNotification, diff);
+                    result = Optional.of(new NotificationEmailFile(emailFilePath, currNotification.email()));
                 }catch (IOException ioException){
-                    log.error("error writing email file for notification "+notification.id(), ioException);
+                    log.error("error writing email file for notification "+currNotification.id(), ioException);
                 }
             }else{
-                log.info("email not created for notification {} ane email {} because diff is empty", notification.id(), notification.email());
+                log.info("email not created for notification {} ane email {} because diff is empty", currNotification.id(), currNotification.email());
             }
 
             // 5. update the run_count for current notification
             notificationRepository.updateRunId(
-                    notification,
-                    notification.runId() + 1
+                    currNotification,
+                    currNotification.runId() + 1
             );
 
-            //6. delete the previous search results because we have new ones inserted
+            //6. delete the search results from 3 runs ago
             if(deletePrevResults) {
                 notificationResultsRepository.deleteSearchResultsFor(
-                        notification,
-                        notification.runId()
+                        currNotification,
+                        currNotification.runId() - 3
                 );
             }
 

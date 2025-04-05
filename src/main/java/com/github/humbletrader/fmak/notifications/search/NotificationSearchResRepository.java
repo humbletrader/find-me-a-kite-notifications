@@ -49,20 +49,20 @@ public class NotificationSearchResRepository {
         );
     }
 
-    public void deleteSearchResultsFor(NotificationDbEntity notification, int runId){
-        log.info("deleting notification search results for notification {} and runId {}", notification.id(), runId);
+    public void deleteSearchResultsFor(NotificationDbEntity notification, int maxRunId){
+        log.info("deleting notification search results for notification {} and runIds previous to {}", notification.id(), maxRunId);
         jdbcTemplate.update(
                 "delete from notification_search_results " +
                         "where " +
-                        "notification_id = ? and notification_run_count = ?",
-                notification.id(), runId
+                        "notification_id = ? and notification_run_count < ?",
+                notification.id(), maxRunId
         );
     }
 
     public List<SearchItem> diffBetween(NotificationDbEntity notification,
                                         int prevRunId,
-                                        int lastRunId){
-        log.info("checking diff search results for notification {} and runIds prev={} last={}", notification.id(), prevRunId, lastRunId);
+                                        int currentRunId){
+        log.info("checking diff search results for notification {} and runIds prev={} last={}", notification.id(), prevRunId, currentRunId);
         return jdbcTemplate.query(
                 "(select brand_name_version, link, price, size, condition from notification_search_results " +
                         "where notification_id = ? and notification_run_count = ?)" +
@@ -76,7 +76,7 @@ public class NotificationSearchResRepository {
                         rs.getString("size"),
                         rs.getString("condition")
                 ),
-                notification.id(), lastRunId, notification.id(), prevRunId
+                notification.id(), currentRunId, notification.id(), prevRunId
         );
     }
 }
