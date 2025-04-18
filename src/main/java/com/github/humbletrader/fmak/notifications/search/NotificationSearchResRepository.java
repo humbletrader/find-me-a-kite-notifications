@@ -64,7 +64,7 @@ public class NotificationSearchResRepository {
                                         int currentRunId){
         log.info("checking diff search results for notification {} and runIds prev={} last={}", notification.id(), prevRunId, currentRunId);
         return jdbcTemplate.query(
-                "(select brand_name_version, link, floor(price), size, condition from notification_search_results " +
+                "(select brand_name_version, link, floor(price) as price, size, condition from notification_search_results " +
                         "where notification_id = ? and notification_run_count = ?)" +
                         " except" +
                         " (select brand_name_version, link, floor(price), size, condition from notification_search_results " +
