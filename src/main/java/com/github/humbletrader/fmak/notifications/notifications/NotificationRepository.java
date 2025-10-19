@@ -24,6 +24,7 @@ public class NotificationRepository {
                 "select * from notifications",
                 (rs,  rowNum) -> new NotificationDbEntity(
                         rs.getInt("id"),
+                        rs.getString("name"),
                         rs.getString("email"),
                         rs.getString("query_as_json"),
                         rs.getInt("run_count")

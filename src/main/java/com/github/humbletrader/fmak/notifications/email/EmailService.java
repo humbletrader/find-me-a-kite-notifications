@@ -40,17 +40,17 @@ public class EmailService {
 
     public Path createEmail(NotificationDbEntity notification,
                             List<SearchItem> diff) throws IOException {
-        var emailContentFilePath = Paths.get("./mail/notification_" + notification.id() + ".mail");
+        var emailContentFilePath = Paths.get("./mail/notification_" + notification.id() + ".html");
 
         log.info("creating email file for notification {} and email {}", notification.id(), notification.email());
         StringBuilder emailFileContent = new StringBuilder();
-        emailFileContent.append(
-                "From: findmeakite@outlook.com\n" +
-                "To: " + notification.email()+"\n"+
-                "Subject: new items in your search\n" +
-                "Mime-Version: 1.0\n" +
-                "Content-Type: text/html\n" +
-                "\n");
+        emailFileContent.append("From: findmeakite@outlook.com").append("\n")
+                .append("To: ").append(notification.email()).append("\n")
+                .append("Subject: new items in your search ").append(notification.name()).append("\n")
+                .append("Mime-Version: 1.0").append("\n")
+                .append("Content-Type: text/html").append("\n")
+                .append("\n");
+        emailFileContent.append("<h2>The following new items appeared in your search ").append(notification.name()).append(" </h2>").append("\n");
         String diffAsHtml = diffAsHtml(diff);
         emailFileContent.append(diffAsHtml);
         Files.writeString(emailContentFilePath, emailFileContent.toString());
