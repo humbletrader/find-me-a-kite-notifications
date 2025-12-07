@@ -9,8 +9,8 @@ spring :
     url: "jdbc:postgresql://localhost:5433/postgres"
     username: kitefinder
     password: cezmeulmeuvrei
-    maxActive : 10
-    maxIdle : 5
+    maxActive : 3
+    maxIdle : 3
     minIdle : 2
     initialSize : 2
     removeAbandoned : true
